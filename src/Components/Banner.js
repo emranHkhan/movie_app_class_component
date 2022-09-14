@@ -1,25 +1,21 @@
-import React, { Component } from 'react';
-import Button from 'react-bootstrap/Button';
-import Card from 'react-bootstrap/Card';
+import React, { Component } from 'react'
+import Button from 'react-bootstrap/Button'
+import Card from 'react-bootstrap/Card'
+import Container from 'react-bootstrap/Container'
+import { movies } from './getMovies'
 
 export default class Banner extends Component {
   render() {
+    const { results: allMovies } = movies
+    const bannerPic = allMovies[0]
+
     return (
-      <Card style={{ width: '18rem' }}>
+      <Card style={{ width: '100%', border: 0 }}>
         <Card.Img
           variant="top"
-          src={
-            'https://images.pexels.com/photos/313782/pexels-photo-313782.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
-          }
+          src={`https://image.tmdb.org/t/p/original${bannerPic.backdrop_path}`}
+          style={{borderRadius: 0}}
         />
-        <Card.Body>
-          <Card.Title>Card Title</Card.Title>
-          <Card.Text>
-            Some quick example text to build on the card title and make up the
-            bulk of the card's content.
-          </Card.Text>
-          <Button variant="primary">Go somewhere</Button>
-        </Card.Body>
       </Card>
     );
   }

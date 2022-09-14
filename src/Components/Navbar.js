@@ -7,8 +7,9 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 export default class Navbar extends Component {
   render() {
     return (
-      <Navbar bg="light" expand="lg">
-      <Container>
+      
+      <Navbar bg="light" expand="lg" className="px-3">
+      
         <Navbar.Brand href="#home">Movie App</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
@@ -28,8 +29,8 @@ export default class Navbar extends Component {
             </NavDropdown> */}
           </Nav>
         </Navbar.Collapse>
-      </Container>
     </Navbar>
+      
     )
   }
 }
