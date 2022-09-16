@@ -34,7 +34,7 @@ export default class Favourites extends Component {
       movies: [],
       currentText: '',
       limit: 5,
-      currPage: 1
+      currPage: 1,
     };
   }
 
@@ -73,10 +73,17 @@ export default class Favourites extends Component {
 
   handlePageChange = (page) => {
     this.setState({
-      currPage: page
-    })
-  }
+      currPage: page,
+    });
+  };
 
+  handleDelete = (id) => {
+    let newArr = [];
+    newArr = this.state.movies.filter((movie) => movie.id !== id);
+    this.setState({ movies: [...newArr] });
+
+    localStorage.setItem('movie', JSON.stringify(newArr));
+  };
 
   render() {
     let filterArr = [];
@@ -95,14 +102,14 @@ export default class Favourites extends Component {
       );
     }
 
-    const pages = Math.ceil(filterArr.length/this.state.limit);
-    const pageArr = []
+    const pages = Math.ceil(filterArr.length / this.state.limit);
+    const pageArr = [];
 
-    for(let i = 1; i <= pages; i++) pageArr.push(i)
+    for (let i = 1; i <= pages; i++) pageArr.push(i);
 
-    const startIndex = (this.state.currPage -1) * this.state.limit
-    const endIndex = startIndex + this.state.limit
-    filterArr = filterArr.slice(startIndex, endIndex)
+    const startIndex = (this.state.currPage - 1) * this.state.limit;
+    const endIndex = startIndex + this.state.limit;
+    filterArr = filterArr.slice(startIndex, endIndex);
 
     return (
       <>
@@ -158,7 +165,7 @@ export default class Favourites extends Component {
                   className="input-group-text col"
                   placeholder="Rows Count"
                   value={this.state.limit}
-                  onChange={(e) => this.setState({limit: e.target.value})}
+                  onChange={(e) => this.setState({ limit: e.target.value })}
                 />
               </div>
 
@@ -213,7 +220,11 @@ export default class Favourites extends Component {
                           <td>{movie.popularity}</td>
                           <td>{movie.vote_average}</td>
                           <td>
-                            <button type="button" className="btn btn-danger">
+                            <button
+                              type="button"
+                              className="btn btn-danger"
+                              onClick={() => this.handleDelete(movie.id)}
+                            >
                               Delete
                             </button>
                           </td>
@@ -226,11 +237,16 @@ export default class Favourites extends Component {
 
               <nav aria-label="Page navigation example">
                 <ul className="pagination">
-                {
-                  pageArr.map(page => (
-                   <li className="page-item"><a className="page-link" onClick={() => this.handlePageChange(page)}>{page}</a></li>
-                  ))
-                }
+                  {pageArr.map((page) => (
+                    <li className="page-item">
+                      <a
+                        className="page-link"
+                        onClick={() => this.handlePageChange(page)}
+                      >
+                        {page}
+                      </a>
+                    </li>
+                  ))}
                 </ul>
               </nav>
             </div>
