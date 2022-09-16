@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
-import { movies } from './getMovies';
+// import { movies } from './getMovies';
+import { BiUpArrow } from 'react-icons/bi';
+import { BiDownArrow } from 'react-icons/bi';
 
 const genreId = {
   12: 'Adventure',
@@ -28,41 +30,110 @@ export default class Favourites extends Component {
     super();
     this.state = {
       genres: [],
-      currentGenre: 'Genres',
+      currentGenre: 'All Genres',
+      movies: [],
+      currentText: '',
+      limit: 5,
+      currPage: 1
     };
   }
 
-  render() {
-    const { results: allMovies } = movies;
+  componentDidMount() {
+    const data = JSON.parse(localStorage.getItem('movies') || '[]');
     const tempArr = [];
-    allMovies.forEach((movie) => {
+    data.forEach((movie) => {
       if (!tempArr.includes(genreId[movie.genre_ids[0]])) {
         tempArr.push(genreId[movie.genre_ids[0]]);
       }
     });
-    tempArr.unshift('Genres');
+    tempArr.unshift('All Genres');
     this.setState({
       genres: [...tempArr],
+      movies: [...data],
     });
+  }
+
+  handleGenreChange = (genre) => {
+    this.setState({
+      currentGenre: genre,
+    });
+  };
+
+  sortMovieTable = (sortingOrder, sortBy) => {
+    const temp = this.state.movies;
+
+    if (sortingOrder === 'desc') {
+      temp.sort((objA, objB) => objA[sortBy] - objB[sortBy]);
+    } else {
+      temp.sort((objA, objB) => objB.popularity - objA.popularity);
+    }
+
+    this.setState({ movies: [...temp] });
+  };
+
+  handlePageChange = (page) => {
+    this.setState({
+      currPage: page
+    })
+  }
+
+
+  render() {
+    let filterArr = [];
+
+    if (this.state.currentText === '') {
+      filterArr = this.state.movies;
+    } else {
+      filterArr = this.state.movies.filter((movie) => {
+        const title = movie.original_title.toLowerCase();
+        return title.includes(this.state.currentText.toLowerCase());
+      });
+    }
+    if (this.state.currentGenre !== 'All Genres') {
+      filterArr = this.state.movies.filter(
+        (movie) => genreId[movie.genre_ids[0]] === this.state.currentGenre
+      );
+    }
+
+    const pages = Math.ceil(filterArr.length/this.state.limit);
+    const pageArr = []
+
+    for(let i = 1; i <= pages; i++) pageArr.push(i)
+
+    const startIndex = (this.state.currPage -1) * this.state.limit
+    const endIndex = startIndex + this.state.limit
+    filterArr = filterArr.slice(startIndex, endIndex)
 
     return (
       <>
         <div className="main container-fluid">
           <div className="row">
             <div className="col-md-3 p-3 col-sm-12">
-              <ul class="list-group">
+              <ul className="list-group">
                 {this.state.genres.map((genre) =>
                   this.state.currentGenre === genre ? (
                     <li
-                      class="list-group-item"
-                      style={{ background: '#3f51b5', color: 'white' }}
+                      className="list-group-item"
+                      style={{
+                        background: '#3f51b5',
+                        color: 'white',
+                        cursor: 'pointer',
+                      }}
+                      key={genre}
+                      onClick={() => this.handleGenreChange(genre)}
                     >
                       {genre}
                     </li>
                   ) : (
                     <li
-                      class="list-group-item"
-                      style={{ background: 'white', color: 'black' }}
+                      className="list-group-item"
+                      style={{
+                        background: 'white',
+                        color: 'black',
+                        cursor: 'pointer',
+                      }}
+                      key={genre}
+                      onClick={() => this.handleGenreChange(genre)}
                     >
                       {genre}
                     </li>
@@ -77,29 +148,59 @@ export default class Favourites extends Component {
                   type="text"
                   className="input-group-text col"
                   placeholder="Search"
+                  value={this.state.currentText}
+                  onChange={(e) =>
+                    this.setState({ currentText: e.target.value })
+                  }
                 />
                 <input
                   type="number"
                   className="input-group-text col"
                   placeholder="Rows Count"
+                  value={this.state.limit}
+                  onChange={(e) => this.setState({limit: e.target.value})}
                 />
               </div>
 
               <div className="row">
-                <table class="table">
+                <table className="table">
                   <thead>
                     <tr>
                       <th scope="col">Title</th>
                       <th scope="col">Genre</th>
-                      <th scope="col">Popularity</th>
-                      <th scope="col">Rating</th>
+                      <th scope="col">
+                        <BiUpArrow
+                          onClick={() =>
+                            this.sortMovieTable('asc', 'popularity')
+                          }
+                        />
+                        Popularity
+                        <BiDownArrow
+                          onClick={() =>
+                            this.sortMovieTable('desc', 'popularity')
+                          }
+                        />
+                      </th>
+                      <th scope="col">
+                        <BiUpArrow
+                          onClick={() =>
+                            this.sortMovieTable('asc', 'vote_average')
+                          }
+                        />
+                        Rating
+                        <BiDownArrow
+                          onClick={() =>
+                            this.sortMovieTable('desc', 'vote_average')
+                          }
+                        />
+                      </th>
                       <th scope="col"></th>
                     </tr>
                   </thead>
                   <tbody>
-                    {allMovies.map((movie) => {
+                    {filterArr.map((movie) => {
                       return (
-                        <tr>
+                        <tr key={movie.original_title}>
                           <td>
                             <img
                               src={`https://image.tmdb.org/t/p/original${movie.backdrop_path}`}
@@ -124,22 +225,12 @@ export default class Favourites extends Component {
               </div>
 
               <nav aria-label="Page navigation example">
-                <ul class="pagination">
-                  <li class="page-item">
-                    <a class="page-link" href="#">
-                      1
-                    </a>
-                  </li>
-                  <li class="page-item">
-                    <a class="page-link" href="#">
-                      2
-                    </a>
-                  </li>
-                  <li class="page-item">
-                    <a class="page-link" href="#">
-                      3
-                    </a>
-                  </li>
+                <ul className="pagination">
+                {
+                  pageArr.map(page => (
+                   <li className="page-item"><a className="page-link" onClick={() => this.handlePageChange(page)}>{page}</a></li>
+                  ))
+                }
                 </ul>
               </nav>
             </div>
